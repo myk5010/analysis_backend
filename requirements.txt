@@ -1,0 +1,9 @@
+# 框架
+Flask==1.1.2
+# 数据库管理
+Flask-SQLAlchemy==2.4.4
+# 数据迁移
+flask-migrate==2.5.3
+# 识别环境变量
+python-dotenv==0.14.0  
+
