@@ -1,12 +1,17 @@
 import os
 from flask import Flask
+from flaskr.extensions import db
+# 蓝图
+from flaskr.blueprints.admin import admin_bp
 
 def create_app(test_config = None):
   # create and configure the app
   app = Flask(__name__, instance_relative_config = True)
   app.config.from_mapping(
     SECRET_KEY = 'dev',
-    DATABASE = os.path.join(app.instance_path, 'flask.sqlite'),
+    # DATABASE = os.path.join(app.instance_path, 'flask.sqlite'),
+    SQLALCHEMY_DATABASE_URI = os.path.join(app.instance_path, 'flask.sqlite'),
+    SQLALCHEMY_TRACK_MODIFICATIONS = False,
   )
 
   if test_config is None:
@@ -27,8 +32,16 @@ def create_app(test_config = None):
   def hello():
     return 'Hello, World!'
 
-  # 数据库
-  from . import db
-  db.init_app(app)
+  register_extensions(app)
+  register_blueprints(app)
 
   return app
+
+def register_extensions(app):
+  # 初始化扩展
+  db.init_app(app)
+
+
+def register_blueprints(app):
+  # 注册蓝图
+  app.register_blueprint(admin_bp)
