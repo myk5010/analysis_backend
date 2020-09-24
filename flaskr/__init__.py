@@ -8,7 +8,7 @@ from flaskr.extensions import db, migrate
 # 蓝图
 from flaskr.blueprints.admin import admin_bp
 # 数据库模型
-from flaskr.models import user, materiel, stock
+from flaskr.models import User, Materiel, Stock, Batch_in, Batch_out
 
 def create_app(config_name = None):
   if config_name is None:
@@ -40,7 +40,7 @@ def register_shell_context(app):
   @app.shell_context_processor
   def make_shell_context():
     # 数据库模型
-    return dict(db=db, user=user, materiel=materiel, stock=stock)
+    return dict(db=db, User=User, Materiel=Materiel, Stock=Stock, Batch_in=Batch_in, Batch_out=Batch_out)
 
 
 # 指令
