@@ -4,3 +4,4 @@ instance/flask.sqlite
 migrations/__pycache__/
 flaskr/blueprints/__pycache__/
 data-dev.db
+.env

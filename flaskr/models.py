@@ -1,6 +1,6 @@
 from datetime import datetime
 from flaskr.extensions import db
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 
 
 # 用户
@@ -10,7 +10,7 @@ class User(db.Model):
   password = db.Column(db.Text, nullable=False)
 
 class User_schema(Schema):
-  id       = fields.Integer()
+  id       = fields.Integer(dump_only=True)
   username = fields.String()
 
 
@@ -28,7 +28,7 @@ class Stock(db.Model):
 
 
 class Stock_schema(Schema):
-  id     = fields.Integer()
+  id     = fields.Integer(dump_only=True)
   amount = fields.Float()
   gross  = fields.Float()
 
@@ -48,7 +48,7 @@ class Batch_in(db.Model):
   batch_outs = db.relationship('Batch_out', back_populates='batch_in')
 
 class Batch_in_schema(Schema):
-  id         = fields.Integer()
+  id         = fields.Integer(dump_only=True)
   serial     = fields.Integer()
   in_number  = fields.Float()
   in_time    = fields.DateTime()
@@ -71,7 +71,7 @@ class Batch_out(db.Model):
   batch_in    = db.relationship('Batch_in', back_populates='batch_outs')
 
 class Batch_out_schema(Schema):
-  id          = fields.Integer()
+  id          = fields.Integer(dump_only=True)
   out_number  = fields.Float()
   out_time    = fields.DateTime()
   price       = fields.Float()
@@ -91,8 +91,8 @@ class Materiel(db.Model):
   stocks        = db.relationship('Stock', back_populates='materiel')
 
 class Materiel_schema(Schema):
-  id            = fields.Integer()
-  materiel_name = fields.String(required=True)
+  id            = fields.Integer(dump_only=True)
+  materiel_name = fields.String(required=True, validate=validate.Length(min=1), error_messages={'required': '物料名称不能为空'})
   standard      = fields.String()
   unit          = fields.String()
   stocks        = fields.Nested(Stock_schema, many=True)
