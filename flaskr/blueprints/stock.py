@@ -1,6 +1,6 @@
 from flask import Blueprint, json, jsonify, request
 from flaskr import db
-from flaskr.models import Stock, Stock_schema
+from flaskr.models.stock import Stock, Stock_schema
 from marshmallow import ValidationError
 
 # 资源路由

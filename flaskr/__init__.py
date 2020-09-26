@@ -8,7 +8,12 @@ from flaskr.extensions import db, migrate
 # 蓝图
 from flaskr.blueprints.admin import admin_bp
 # 数据库模型
-from flaskr.models import User, Materiel, Stock, Batch_in, Batch_out
+from flaskr.models.user import User
+from flaskr.models.materiel import Materiel
+from flaskr.models.stock import Stock
+from flaskr.models.batch_in import Batch_in
+from flaskr.models.batch_out import Batch_out
+
 
 def create_app(config_name = None):
   if config_name is None:

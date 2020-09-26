@@ -1,6 +1,6 @@
 from flask import Blueprint, json, jsonify, request
 from flaskr import db
-from flaskr.models import Materiel, Materiel_schema
+from flaskr.models import materiel
 from marshmallow import ValidationError
 
 # 资源路由
@@ -14,13 +14,13 @@ class SettingAPI(MethodView):
   def get(self):
     dict_request = request.values.to_dict()
     # 序列化数据
-    schema = Materiel_schema(many=True, exclude=['stocks'])
+    schema = materiel.Materiel_schema(many=True, exclude=['stocks'])
     # sql语句
-    sql = Materiel.query.order_by(Materiel.id.desc())
+    sql = materiel.Materiel.query.order_by(materiel.Materiel.id.desc())
     # 筛选
-    if dict_request.__contains__('materiel_name'):  sql = sql.filter(Materiel.materiel_name.like('%'+dict_request['materiel_name']+'%')) 
-    if dict_request.__contains__('standard'):       sql = sql.filter(Materiel.standard.like('%'+dict_request['standard']+'%')) 
-    if dict_request.__contains__('unit'):           sql = sql.filter(Materiel.unit.like('%'+dict_request['unit']+'%')) 
+    if dict_request.__contains__('materiel_name'):  sql = sql.filter(materiel.Materiel.materiel_name.like('%'+dict_request['materiel_name']+'%')) 
+    if dict_request.__contains__('standard'):       sql = sql.filter(materiel.Materiel.standard.like('%'+dict_request['standard']+'%')) 
+    if dict_request.__contains__('unit'):           sql = sql.filter(materiel.Materiel.unit.like('%'+dict_request['unit']+'%')) 
     # 物料种类
     if set(['page', 'limit']).issubset(dict_request):
       # 页码
@@ -43,13 +43,13 @@ class SettingAPI(MethodView):
     request_data = request.json
     try:
       # 反序列化数据
-      schema = Materiel_schema()
+      schema = materiel.Materiel_schema()
       # 验证数据
       res = schema.load(request_data)
     except ValidationError  as e:
       # 422错误状态码, 表单验证错误专用
       return {'message': e.messages}, 422
-    db.session.add(Materiel(**res))
+    db.session.add(materiel.Materiel(**res))
     db.session.commit()
     return {'message': '提交成功'}
 
