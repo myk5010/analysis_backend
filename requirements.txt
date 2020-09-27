@@ -1,5 +1,7 @@
 # 框架
 Flask==1.1.2
+# mysql驱动
+pymysql==0.10.1
 # 数据库管理
 Flask-SQLAlchemy==2.4.4
 # 数据迁移

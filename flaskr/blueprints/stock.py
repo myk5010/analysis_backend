@@ -6,7 +6,7 @@ from marshmallow import ValidationError
 # 资源路由
 from flask.views import MethodView
 
-stock_bp = Blueprint('stock_bp', __name__, url_prefix='/stock_bp')
+stock_bp = Blueprint('stock', __name__, url_prefix='/stock')
 
 
 class StockAPI(MethodView):
@@ -25,7 +25,7 @@ class StockAPI(MethodView):
     if set(['page', 'limit']).issubset(dict_request):
       # 页码
       list_paginate = [
-        int(dict_request['page']), 
+        int(dict_request['page']),
         int(dict_request['limit'])
       ]
       Pagination = sql.paginate(*list_paginate) # 分页查询

@@ -7,6 +7,7 @@ from flaskr.settings import config
 from flaskr.extensions import db, migrate
 # 蓝图
 from flaskr.blueprints.admin import admin_bp
+from flaskr.blueprints.stock import stock_bp
 # 数据库模型
 from flaskr.models.user import User
 from flaskr.models.materiel import Materiel
@@ -39,6 +40,7 @@ def register_extensions(app):
 # 蓝图
 def register_blueprints(app):
   app.register_blueprint(admin_bp)
+  app.register_blueprint(stock_bp)
 
 
 def register_shell_context(app):

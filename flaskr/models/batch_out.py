@@ -6,12 +6,14 @@ from marshmallow import Schema, fields, validate
 class Batch_out(db.Model):
   id          = db.Column(db.Integer, primary_key=True)
   out_number  = db.Column(db.Float(6,1), nullable=False, comment='出库数量')
-  out_time    = db.Column(db.DateTime, default=datetime.utcnow, index=True, comment='出库时间')
   price       = db.Column(db.Float(6,1), nullable=False, comment='出售单价')
   loss        = db.Column(db.Float(6,1), default=0, comment='损耗')
   document    = db.Column(db.String(20), comment='单据编号')
   code        = db.Column(db.String(20), comment='物料长代码')
   comment     = db.Column(db.Text, comment='备注')
+  created_at  = db.Column(db.DateTime, default=datetime.utcnow, comment='出库时间')
+  updated_at  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+  delete_at   = db.Column(db.DateTime)
   # 关联 - batch_in
   batch_in_id = db.Column(db.Integer, db.ForeignKey('batch_in.id'), nullable=False, comment='关联入库批次ID')
   batch_in    = db.relationship('Batch_in', back_populates='batch_outs')
