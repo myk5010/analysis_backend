@@ -6,7 +6,7 @@ from flaskr.models.stock import Stock, Stock_schema
 from flaskr.models.batch_in import Batch_in, Batch_in_schema
 from flaskr.models.materiel import Materiel
 # 报错
-from marshmallow import ValidationError
+from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 # 资源路由
@@ -17,6 +17,7 @@ restock_bp = Blueprint('restock', __name__, url_prefix='/restock')
 
 class RestockAPI(MethodView):
 
+  '''进货列表'''
   def get(self):
     dict_request = request.values.to_dict()
     # 序列化数据
@@ -45,42 +46,41 @@ class RestockAPI(MethodView):
       })
 
     
-  # 入库
+  '''入库'''
   def post(self):
     request_data = request.json
     for index in range(len(request_data['restockNumberTable'])):
       item = request_data['restockNumberTable'][index]
-      print(item)
-      validate_data = {
-        'amount': item['sum'],
-        'gross': item['in_number'],
-        'materiel_id': item['id'],
-      }
-      # TODO: 用关联关系一次性写入两个表
       # 写入or更新库存 --->
+      # TODO: 用关联关系一次性写入两个表
+      stock_data = {
+        'price'       : item['sum'],
+        'in_number'   : item['in_number'],
+        'materiel_id' : item['id'],        
+      }
       try:
         # 反序列化数据
         schema = Stock_schema()
         # 验证数据
-        res = schema.load(validate_data)
+        stock_res = schema.load(stock_data)
       except ValidationError:
-        return {'message': '提交库存数据验证失败'}, 422 # 422表单验证报错
+        return {'message': '库存数据验证失败'}, 422 # 422表单验证报错
       # 关联的库存表id
       stock_key = None
       # 库存表是否已有同类型库存
-      exist = Stock.query.filter(Stock.materiel_id == validate_data['materiel_id']).first()
+      exist = Stock.query.filter(Stock.materiel_id == stock_data['materiel_id']).first()
       if exist:
         stock_key = exist.id
         try:
           # 累加库存
-          for key in res: 
-            if key in ['amount', 'gross']: setattr(exist, key, Decimal(res[key])+getattr(exist, key))
+          for key in stock_res: 
+            if key in ['amount', 'gross']: setattr(exist, key, Decimal(stock_res[key])+getattr(exist, key))
           db.session.commit()
         except IntegrityError:
           return {'message': '更新库存失败'}, 421 # 421数据库操作报错
       else:
         try:
-          stock_obj = Stock(**res)
+          stock_obj = Stock(**stock_res)
           db.session.add(stock_obj)
           db.session.commit()
           stock_key = stock_obj.id
@@ -89,25 +89,27 @@ class RestockAPI(MethodView):
       # <--- end
       # 写入进货表 --->
       try:
-        validate_data = {
-          'serial': int(request_data['serial']),
-          'in_number': float(item['in_number']),
-          'price': float(item['price']),
-          'comment': item['comment'] if item.__contains__('comment') else '',
-          'stock_id': stock_key,
+        batch_in_data = {
+          'serial'     : request_data['serial'],
+          'in_number'  : item['in_number'],
+          'remainder'  : item['in_number'],
+          'price'      : item['price'],
+          'commission' : item['commission'] if item.__contains__('commission') else 0,
+          'comment'    : item['comment'] if item.__contains__('comment') else '',
+          'stock_id'   : stock_key,
         }
-        print(validate_data)
         # 反序列化数据
         schema = Batch_in_schema()
         # 验证数据
-        res = schema.load(validate_data)
+        Batch_in_res = schema.load(batch_in_data, partial=('commission', 'comment', 'stock_id'))
       except ValidationError:
-        return {'message': '提交入库数据验证失败'}, 422 # 422表单验证报错
+        return {'message': '进货数据验证失败'}, 422 # 422表单验证报错
       try:
-        db.session.add(Batch_in(**res))
+        db.session.add(Batch_in(**Batch_in_res))
         db.session.commit()
       except IntegrityError:
-        return {'message': '写入库存失败'}, 421 # 421数据库操作报错
+        # TODO: 回滚库存表操作
+        return {'message': '写入进货数据失败'}, 421 # 421数据库操作报错
       # <--- end
     return {'message': '进货完成'}
 

@@ -6,7 +6,7 @@ from marshmallow import Schema, fields, validate
 # 入库批次表
 class Batch_in(db.Model):
   id         = db.Column(db.Integer, primary_key=True, mssql_identity_start=2, mssql_identity_increment=2)
-  serial     = db.Column(db.Integer, nullable=False, comment='批次序列号')
+  serial     = db.Column(db.String, nullable=False, comment='批次序列号')
   in_number  = db.Column(db.DECIMAL(6,1), nullable=False, comment='入库数量')
   remainder  = db.Column(db.DECIMAL(6,1), nullable=False, comment='剩余库存')
   price      = db.Column(db.DECIMAL(6,1), nullable=False, comment='进货单价')
@@ -24,16 +24,16 @@ class Batch_in(db.Model):
 
 class Batch_in_schema(Schema):
   id         = fields.Integer(dump_only=True)
-  serial     = fields.Integer()
+  serial     = fields.String()
   in_number  = fields.Decimal()
   remainder  = fields.Decimal()
   commission = fields.Decimal()
   price      = fields.Decimal()
   comment    = fields.String()
-  created_at = fields.Date()
   stock_id   = fields.Integer(load_only=True)
   # 如果存在相互调用,必须使用exclude或only参数避免无限递归
   stock      = fields.Nested('flaskr.models.stock.Stock_schema', only=('materiel',))
+
 
 
 
