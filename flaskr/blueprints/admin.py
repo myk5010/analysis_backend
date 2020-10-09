@@ -1,5 +1,6 @@
 from flask import Blueprint, json, jsonify, request
 from flaskr import db
+from sqlalchemy.exc import IntegrityError
 from flaskr.models import materiel
 from marshmallow import ValidationError
 
@@ -46,12 +47,18 @@ class SettingAPI(MethodView):
       schema = materiel.Materiel_schema()
       # 验证数据
       res = schema.load(request_data)
-    except ValidationError  as e:
+    except ValidationError:
       # 422错误状态码, 表单验证错误专用
-      return {'message': e.messages}, 422
-    db.session.add(materiel.Materiel(**res))
-    db.session.commit()
-    return {'message': '提交成功'}
+      return {'message': ValidationError.messages}, 422
+    try:
+      db.session.add(materiel.Materiel(**res))
+      db.session.commit()
+    except IntegrityError:
+      # print(IntegrityError)
+      # db.session.rollback()
+      return {'message': '物料名称不能重复,提交失败'}, 421 # 421数据库报错
+    else:
+      return {'message': '提交成功'}
 
 
 setting_view = SettingAPI.as_view('setting_api')
